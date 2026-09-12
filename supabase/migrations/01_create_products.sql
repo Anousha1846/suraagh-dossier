@@ -9,8 +9,6 @@ create table products (
   difficulty        smallint not null check (difficulty between 1 and 5),
   min_players       smallint not null check (min_players > 0),
   max_players       smallint not null check (max_players >= min_players),
-  duration_min_mins smallint check (duration_min_mins is null or duration_min_mins > 0),
-  duration_max_mins smallint check (duration_max_mins is null or duration_max_mins >= duration_min_mins),
   price             numeric(10,2) not null check (price >= 0),
   stock_quantity    integer not null default 0 check (stock_quantity >= 0),
   status            product_status not null default 'draft',
