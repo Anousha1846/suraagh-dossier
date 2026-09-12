@@ -1,6 +1,7 @@
 'use client';
 
 import { useCartStore } from '@/lib/cart/store';
+import Link from 'next/link';
 
 export default function CartPage() {
   const items = useCartStore((state) => state.items);
@@ -29,6 +30,7 @@ export default function CartPage() {
         </div>
       ))}
       <p>Total: Rs. {total}</p>
+      <Link href="/checkout">Proceed to Checkout</Link>
     </div>
   );
 }
