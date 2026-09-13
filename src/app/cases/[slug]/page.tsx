@@ -20,8 +20,20 @@ export default async function CasePage({ params }: { params: Promise<{ slug: str
       <p>{product.tagline}</p>
       <p>{product.description}</p>
       <p>Difficulty: {product.difficulty}/5</p>
-      <p>{product.min_players}–{product.max_players} players</p>
-      <p>Rs. {product.price}</p>
+
+      <p>{product.player_range_label || `${product.min_players}–${product.max_players} players`}</p>
+
+      {product.compare_at_price ? (
+        <p>
+          <span style={{ textDecoration: 'line-through', color: '#888' }}>
+            Rs. {product.compare_at_price}
+          </span>{' '}
+          Rs. {product.price}
+        </p>
+      ) : (
+        <p>Rs. {product.price}</p>
+      )}
+
       <AddToCartButton product={product} />
       <Link href="/cart">View Cart</Link>
     </div>
