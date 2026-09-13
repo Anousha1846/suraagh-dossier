@@ -1,0 +1,1 @@
+update products set slug = 'crossed-out' where slug = 'laila-luqmaan';
