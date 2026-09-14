@@ -2,15 +2,51 @@
 
 import { useCartStore } from '@/lib/cart/store';
 import { useState } from 'react';
+import { placeCodOrder } from './actions';
 
 export default function CheckoutPage() {
   const items = useCartStore((state) => state.items);
+  const clearCart = useCartStore((state) => state.clearCart);
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'online_transfer'>('cod');
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   if (items.length === 0) {
     return <p>Your cart is empty.</p>;
+  }
+
+  async function handlePlaceOrder() {
+    if (paymentMethod !== 'cod') {
+      setErrorMsg('Online transfer isn\'t available yet — select Cash on Delivery.');
+      return;
+    }
+    if (!fullName || !phone || !address || !city) {
+      setErrorMsg('Please fill in all your details.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setErrorMsg('');
+
+    try {
+      await placeCodOrder({
+        fullName,
+        phone,
+        address,
+        city,
+        items: items.map((item) => ({ id: item.id, quantity: item.quantity })),
+      });
+      clearCart();
+    } catch (err) {
+      setErrorMsg('Something went wrong placing your order. Please try again.');
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -19,16 +55,16 @@ export default function CheckoutPage() {
 
       <h2>Order Summary</h2>
       {items.map((item) => (
-        <p key={item.id}>{item.name} × {item.quantity} — Rs. {item.price * item.quantity}</p>
+        <p key={item.id}>{item.name} x {item.quantity} — Rs. {item.price * item.quantity}</p>
       ))}
       <p>Total: Rs. {total}</p>
 
       <h2>Your Details</h2>
-      <form>
-        <input type="text" placeholder="Full name" required />
-        <input type="tel" placeholder="Phone / WhatsApp number" required />
-        <input type="text" placeholder="Address" required />
-        <input type="text" placeholder="City" required />
+      <form onSubmit={(e) => e.preventDefault()}>
+        <input type="text" placeholder="Full name" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+        <input type="tel" placeholder="Phone / WhatsApp number" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+        <input type="text" placeholder="Address" value={address} onChange={(e) => setAddress(e.target.value)} required />
+        <input type="text" placeholder="City" value={city} onChange={(e) => setCity(e.target.value)} required />
 
         <h2>Payment Method</h2>
         <label>
@@ -50,7 +86,11 @@ export default function CheckoutPage() {
           Online Bank Transfer
         </label>
 
-        <button type="button">Place Order</button>
+        {errorMsg && <p style={{ color: 'red' }}>{errorMsg}</p>}
+
+        <button type="button" onClick={handlePlaceOrder} disabled={isSubmitting}>
+          {isSubmitting ? 'Placing Order...' : 'Place Order'}
+        </button>
       </form>
     </div>
   );

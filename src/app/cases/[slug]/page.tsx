@@ -35,7 +35,7 @@ export default async function CasePage({ params }: { params: Promise<{ slug: str
       )}
 
       <AddToCartButton product={product} />
-      <Link href="/cart">View Cart</Link>
+      <Link href="/cart">   ViewCart</Link>
     </div>
   );
 }
