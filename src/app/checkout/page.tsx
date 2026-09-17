@@ -1,8 +1,9 @@
 'use client';
 
 import { useCartStore } from '@/lib/cart/store';
-import { useState } from 'react';
-import { placeCodOrder } from './actions';
+import { useState, useRef } from 'react';
+import { isRedirectError } from 'next/dist/client/components/redirect-error';
+import { placeOrder } from './actions';
 
 export default function CheckoutPage() {
   const items = useCartStore((state) => state.items);
@@ -17,35 +18,41 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
+  const hasSubmittedRef = useRef(false);
+
   if (items.length === 0) {
     return <p>Your cart is empty.</p>;
   }
 
   async function handlePlaceOrder() {
-    if (paymentMethod !== 'cod') {
-      setErrorMsg('Online transfer isn\'t available yet — select Cash on Delivery.');
-      return;
-    }
+    if (hasSubmittedRef.current) return;
+
     if (!fullName || !phone || !address || !city) {
       setErrorMsg('Please fill in all your details.');
       return;
     }
 
+    hasSubmittedRef.current = true;
     setIsSubmitting(true);
     setErrorMsg('');
 
     try {
-      await placeCodOrder({
+      await placeOrder({
         fullName,
         phone,
         address,
         city,
+        paymentMethod,
         items: items.map((item) => ({ id: item.id, quantity: item.quantity })),
       });
       clearCart();
     } catch (err) {
+      if (isRedirectError(err)) {
+        throw err; // let Next.js handle the redirect, this isn't a real failure
+      }
       setErrorMsg('Something went wrong placing your order. Please try again.');
       setIsSubmitting(false);
+      hasSubmittedRef.current = false;
     }
   }
 
@@ -55,7 +62,7 @@ export default function CheckoutPage() {
 
       <h2>Order Summary</h2>
       {items.map((item) => (
-        <p key={item.id}>{item.name} x {item.quantity} — Rs. {item.price * item.quantity}</p>
+        <p key={item.id}>{item.name} × {item.quantity} — Rs. {item.price * item.quantity}</p>
       ))}
       <p>Total: Rs. {total}</p>
 
@@ -68,21 +75,11 @@ export default function CheckoutPage() {
 
         <h2>Payment Method</h2>
         <label>
-          <input
-            type="radio"
-            name="payment"
-            checked={paymentMethod === 'cod'}
-            onChange={() => setPaymentMethod('cod')}
-          />
+          <input type="radio" name="payment" checked={paymentMethod === 'cod'} onChange={() => setPaymentMethod('cod')} />
           Cash on Delivery
         </label>
         <label>
-          <input
-            type="radio"
-            name="payment"
-            checked={paymentMethod === 'online_transfer'}
-            onChange={() => setPaymentMethod('online_transfer')}
-          />
+          <input type="radio" name="payment" checked={paymentMethod === 'online_transfer'} onChange={() => setPaymentMethod('online_transfer')} />
           Online Bank Transfer
         </label>
 

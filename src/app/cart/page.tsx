@@ -14,19 +14,24 @@ export default function CartPage() {
     return <p>Your cart is empty.</p>;
   }
 
+  function handleDecrease(id: string, currentQty: number) {
+    if (currentQty <= 1) {
+      removeItem(id);
+    } else {
+      updateQuantity(id, currentQty - 1);
+    }
+  }
+
   return (
     <div>
       <h1>Cart</h1>
       {items.map((item) => (
         <div key={item.id}>
           <p>{item.name} — Rs. {item.price}</p>
-          <input
-            type="number"
-            min={1}
-            value={item.quantity}
-            onChange={(e) => updateQuantity(item.id, Number(e.target.value))}
-          />
-          <button onClick={() => removeItem(item.id)}>Remove</button>
+          <button onClick={() => handleDecrease(item.id, item.quantity)}>−</button>
+          <span> {item.quantity} </span>
+          <button onClick={() => updateQuantity(item.id, item.quantity + 1)}>+</button>
+          <button onClick={() => removeItem(item.id)}>Remove entirely</button>
         </div>
       ))}
       <p>Total: Rs. {total}</p>

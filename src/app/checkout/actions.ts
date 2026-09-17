@@ -8,17 +8,17 @@ type CheckoutInput = {
   phone: string;
   address: string;
   city: string;
+  paymentMethod: 'cod' | 'online_transfer';
   items: { id: string; quantity: number }[];
 };
 
-export async function placeCodOrder(input: CheckoutInput) {
-  const { fullName, phone, address, city, items } = input;
+export async function placeOrder(input: CheckoutInput) {
+  const { fullName, phone, address, city, paymentMethod, items } = input;
 
   if (!items.length) {
     throw new Error('Cart is empty');
   }
 
-  // 1. Re-fetch real prices server-side not trusting client-sent prices
   const productIds = items.map((i) => i.id);
   const { data: products, error: productsError } = await supabaseAdmin
     .from('products')
@@ -41,10 +41,9 @@ export async function placeCodOrder(input: CheckoutInput) {
   });
 
   const subtotal = orderItemsData.reduce((sum, i) => sum + i.line_total, 0);
-  const shippingCost = 0; // PostEx not integrated yet
+  const shippingCost = 0;
   const total = subtotal + shippingCost;
 
-  // 2. Customer lookup-or-create by phone
   const { data: existingCustomer } = await supabaseAdmin
     .from('customers')
     .select('id')
@@ -66,10 +65,11 @@ export async function placeCodOrder(input: CheckoutInput) {
     customerId = newCustomer.id;
   }
 
-  // 3. Generate order number
   const orderNumber = `SD-${Date.now().toString().slice(-6)}`;
 
-  // 4. Insert order
+  // payment_status differs by method: COD has nothing paid yet, online transfer is awaiting proof
+  const paymentStatus = paymentMethod === 'cod' ? 'unpaid' : 'pending_verification';
+
   const { data: order, error: orderError } = await supabaseAdmin
     .from('orders')
     .insert({
@@ -80,8 +80,8 @@ export async function placeCodOrder(input: CheckoutInput) {
       shipping_address: address,
       shipping_city: city,
       status: 'pending_verification',
-      payment_method: 'cod',
-      payment_status: 'unpaid',
+      payment_method: paymentMethod,
+      payment_status: paymentStatus,
       subtotal,
       shipping_cost: shippingCost,
       total,
@@ -93,7 +93,6 @@ export async function placeCodOrder(input: CheckoutInput) {
     throw new Error('Failed to create order');
   }
 
-  // 5. Insert order_items
   const { error: itemsError } = await supabaseAdmin
     .from('order_items')
     .insert(orderItemsData.map((item) => ({ ...item, order_id: order.id })));
@@ -102,10 +101,9 @@ export async function placeCodOrder(input: CheckoutInput) {
     throw new Error('Failed to save order items');
   }
 
-  // 6. Insert payment record
   const { error: paymentError } = await supabaseAdmin.from('payments').insert({
     order_id: order.id,
-    method: 'cod',
+    method: paymentMethod,
     amount: total,
     status: 'pending',
   });
@@ -114,6 +112,5 @@ export async function placeCodOrder(input: CheckoutInput) {
     throw new Error('Failed to create payment record');
   }
 
-  // 7. Redirect to confirmation
   redirect(`/order-confirmation/${order.order_number}`);
 }
