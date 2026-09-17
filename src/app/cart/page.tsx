@@ -33,8 +33,24 @@ export default function CartPage() {
   return (
     <div className="bg-ivory min-h-screen px-6 py-12">
       <div className="max-w-2xl mx-auto">
-        <p className="font-mono text-xs tracking-widest text-bronze mb-4">DOSSIER — YOUR CART</p>
-        <h1 className="font-display text-4xl text-ink mb-8">Cart</h1>
+        <div className="flex items-center gap-3 mb-8">
+          <Link
+            href="/#products"
+            className="font-mono text-[12px] tracking-[0.2em] text-olive hover:text-burnt-orange transition-colors"
+          >
+            CASES
+          </Link>
+
+          <span className="font-mono text-[12px] text-olive/40">
+            /
+          </span>
+
+          <span className="font-mono text-[12px] tracking-[0.2em] text-aged-gray">
+            CART
+          </span>
+        </div>
+        {/* <p className="font-mono text-xs tracking-widest text-bronze mb-4">— YOUR CART</p> */}
+        <h1 className="font-display text-4xl text-ink mb-8">Cart 🛒</h1>
 
         <div className="space-y-4 mb-8">
           {items.map((item) => (
@@ -68,7 +84,7 @@ export default function CartPage() {
           ))}
         </div>
 
-        <div className="flex items-center justify-between border-t border-bronze pt-6">
+        <div className="flex items-center flex-col gap-4 sm:flex-row sm:justify-between border-t border-bronze pt-6">
           <p className="font-display text-2xl text-ink">Total: Rs. {total}</p>
           <Link
             href="/checkout"

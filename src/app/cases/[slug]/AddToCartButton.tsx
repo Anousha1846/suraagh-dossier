@@ -23,7 +23,7 @@ export function AddToCartButton({ product }: { product: { id: string; slug: stri
       </button>
 
       {showConfirmation && (
-        <p className="font-mono text-xs text-green-800 mt-2">
+        <p className="font-mono text-xs text-burnt-orange mt-2">
           ✓ Added to cart
         </p>
       )}

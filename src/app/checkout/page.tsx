@@ -4,6 +4,7 @@ import { useCartStore } from '@/lib/cart/store';
 import { useState, useRef } from 'react';
 import { isRedirectError } from 'next/dist/client/components/redirect-error';
 import { placeOrder } from './actions';
+import Link from 'next/link';
 
 export default function CheckoutPage() {
   const items = useCartStore((state) => state.items);
@@ -51,9 +52,37 @@ export default function CheckoutPage() {
   const inputClass = "w-full bg-ivory border border-bronze rounded-sm px-4 py-3 font-sans text-ink placeholder:text-aged-gray focus:outline-none focus:border-burnt-orange transition-colors";
 
   return (
+
     <div className="bg-ivory min-h-screen px-6 py-12">
       <div className="max-w-2xl mx-auto">
-        <p className="font-mono text-xs tracking-widest text-bronze mb-4">DOSSIER — CHECKOUT</p>
+        <div className="flex items-center gap-3 mb-8">
+          <Link
+            href="/#products"
+            className="font-mono text-[12px] tracking-[0.2em] text-olive hover:text-burnt-orange transition-colors"
+          >
+            CASES
+          </Link>
+
+          <span className="font-mono text-[12px] text-olive/40">
+            /
+          </span>
+
+          <Link
+            href="/cart"
+            className="font-mono text-[12px] tracking-[0.2em] text-olive hover:text-burnt-orange transition-colors"
+          >
+            CART
+          </Link>
+
+          <span className="font-mono text-[12px] text-olive/40">
+            /
+          </span>
+
+          <span className="font-mono text-[12px] tracking-[0.2em] text-aged-gray">
+            CHECKOUT
+          </span>
+        </div>
+        <p className="font-mono text-xs tracking-widest text-bronze mb-4">— CHECKOUT</p>
         <h1 className="font-display text-4xl text-ink mb-8">Checkout</h1>
 
         <div className="bg-case-paper border border-bronze rounded-sm p-6 mb-8">
@@ -68,24 +97,86 @@ export default function CheckoutPage() {
 
         <h2 className="font-mono text-xs tracking-widest text-bronze mb-4">YOUR DETAILS</h2>
         <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
-          <input type="text" placeholder="Full name" value={fullName} onChange={(e) => setFullName(e.target.value)} required className={inputClass} />
-          <input type="tel" placeholder="Phone / WhatsApp number" value={phone} onChange={(e) => setPhone(e.target.value)} required className={inputClass} />
-          <input type="text" placeholder="Address" value={address} onChange={(e) => setAddress(e.target.value)} required className={inputClass} />
-          <input type="text" placeholder="City" value={city} onChange={(e) => setCity(e.target.value)} required className={inputClass} />
+          <input
+            type="text"
+            placeholder="Full name"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            required
+            minLength={3}
+            className={inputClass}
+          />
 
-          <h2 className="font-mono text-xs tracking-widest text-bronze pt-4">PAYMENT METHOD</h2>
+          <input
+            type="tel"
+            placeholder="Phone / WhatsApp number"
+            value={phone}
+            onChange={(e) => {
+              const value = e.target.value.replace(/\D/g, '');
+
+              if (value.length <= 11) {
+                setPhone(value);
+              }
+            }}
+            required
+            maxLength={11}
+            inputMode="numeric"
+            className={inputClass}
+          />
+
+          <input
+            type="text"
+            placeholder="Address"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            required
+            minLength={5}
+            className={inputClass}
+          />
+
+          <input
+            type="text"
+            placeholder="City"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            required
+            minLength={2}
+            className={inputClass}
+          />
+
+          <h2 className="font-mono text-xs tracking-widest text-bronze pt-4">
+            PAYMENT METHOD
+          </h2>
+
           <div className="space-y-2">
             <label className="flex items-center gap-3 font-sans text-ink cursor-pointer">
-              <input type="radio" name="payment" checked={paymentMethod === 'cod'} onChange={() => setPaymentMethod('cod')} className="accent-burnt-orange" />
+              <input
+                type="radio"
+                name="payment"
+                checked={paymentMethod === 'cod'}
+                onChange={() => setPaymentMethod('cod')}
+                className="accent-burnt-orange"
+              />
               Cash on Delivery
             </label>
+
             <label className="flex items-center gap-3 font-sans text-ink cursor-pointer">
-              <input type="radio" name="payment" checked={paymentMethod === 'online_transfer'} onChange={() => setPaymentMethod('online_transfer')} className="accent-burnt-orange" />
+              <input
+                type="radio"
+                name="payment"
+                checked={paymentMethod === 'online_transfer'}
+                onChange={() => setPaymentMethod('online_transfer')}
+                className="accent-burnt-orange"
+              />
               Online Bank Transfer
             </label>
           </div>
 
-          {errorMsg && <p className="text-burnt-orange font-sans text-sm">{errorMsg}</p>}
+          {errorMsg && (
+            <p className="text-burnt-orange font-sans text-sm">
+              {errorMsg}
+            </p>
+          )}
 
           <button
             type="button"
@@ -96,6 +187,7 @@ export default function CheckoutPage() {
             {isSubmitting ? 'Placing Order...' : 'Place Order'}
           </button>
         </form>
+
       </div>
     </div>
   );

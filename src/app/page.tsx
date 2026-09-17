@@ -9,8 +9,8 @@ export default function HomePage() {
     <div>
       <Hero />
       <ProductsGrid />
-      <About />
       <FAQ />
+            <About />
       <Contact />
     </div>
   );
