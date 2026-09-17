@@ -1,26 +1,27 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  /* Named colors — your exact palette */
+  --color-obsidian: #11110F;
+  --color-charcoal: #302E29;
+  --color-olive: #7E7755;
+  --color-ivory: #F4F0E6;
+  --color-aged-gray: #AAA59A;
+  --color-burnt-orange: #C96A32;
+  --color-amber: #E39A52;
+  --color-bronze: #4A4337;
+  --color-case-paper: #E8E0CF;
+  --color-ink: #24221E;
+  --color-dark-brown: #49372A;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Font families, mapped to the CSS variables set in layout.tsx */
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-ivory);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
 }
